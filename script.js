@@ -37,14 +37,30 @@ function autosDisponibles (marca, precioMax, autos){
     return disponibles
 } // funcion que recibe una marca y un precio y devuelve un array con los autos disponibles.
 
+const divAutos = document.getElementById('divAutos')
+divAutos.innerHTML = `<p>Bienvenido a venta de autos online</p>`
+
 let marca = prompt("ingrese la marca del auto que desea").toLowerCase()
 let precioMax = parseFloat(prompt("ingrese el precio maximo que está dispuesto a pagar"))
 
 const disponibles = autosDisponibles(marca, precioMax, autos)
 
 if(disponibles.length > 0){
-    console.log(`Hay ${disponibles.length} autos disponibles de la marca ${marca} con un valor máximo de ${precioMax}, detallados a continuación: `)
-    console.table(disponibles)
+    divAutos.innerHTML +=
+    `
+        <p>Hay ${disponibles.length} autos disponibles de la marca ${marca} con un valor máximo de ${precioMax}, detallados a continuación: </p>
+    `
+    disponibles.forEach(auto =>{
+        divAutos.innerHTML +=
+        `
+            <div class="styleAutos" id="autoID${auto.id}">
+                <p>ID: ${auto.id}</p>
+                <p>Marca: ${auto.marca}</p>
+                <p>Modelo: ${auto.modelo}</p>
+                <p>Precio: ${auto.precio}</p>  
+            </div> 
+        `
+    })
     let idElegido 
     do{
         idElegido = parseInt(prompt("Ingrese el ID del auto que desea comprar. Ingrese 99 para cancelar la compra."))
@@ -52,8 +68,8 @@ if(disponibles.length > 0){
     if(!(idElegido==99)){
         const comprado = disponibles.find(auto => auto.id == idElegido) // encuentra el auto segun el id ingresado
         comprado.descuento(prompt("ingrese un codigo de descuento o cualquier numero en caso de no tener ninguno"))
-        console.log(`Felicitaciones! Compraste el auto ${comprado.marca} modelo ${comprado.modelo}. Precio final: ${comprado.precio}`)
+        divAutos.innerHTML = `<p class='success'>Felicitaciones! Compraste el auto ${comprado.marca} modelo ${comprado.modelo}. Precio final: ${comprado.precio}</p>`
         autos[idElegido].disminuirStock()
-    } else {console.log("No ha comprado ningun auto.")}
-} else console.log("No hay autos disponibles según los datos especificados.")
+    } else {divAutos.innerHTML = `<p class='error'>No ha comprado ningun auto.</p>`}
+} else divAutos.innerHTML = `<p>No contamos con autos disponibles de la marca ${marca}.</p>`
 

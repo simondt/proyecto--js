@@ -1,0 +1,10 @@
+.styleAutos{
+    background-color: cyan;
+}
+.success{
+    background-color: lime;
+}
+.error{
+    color: white;
+    background-color: red;
+}
