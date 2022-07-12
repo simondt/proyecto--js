@@ -32,44 +32,50 @@ const auto9 = new Auto(8, 2018, "nissan", 40000, 7)
 
 const autos = [auto1, auto2, auto3, auto4, auto5, auto6, auto7, auto8, auto9]
 
-function autosDisponibles (marca, precioMax, autos){
-    let disponibles = autos.filter(auto => (auto.marca == marca && auto.precio <= precioMax))
+function autosDisponibles (inputBusq, autos){
+    const disponibles = autos.filter(auto => (auto.marca == inputBusq || auto.precio == inputBusq || auto.modelo == inputBusq))
     return disponibles
-} // funcion que recibe una marca y un precio y devuelve un array con los autos disponibles.
+} // funcion que recibe una marca, modelo o precio y devuelve un array con los elementos que coincidan.
 
-const divAutos = document.getElementById('divAutos')
-divAutos.innerHTML = `<p>Bienvenido a venta de autos online</p>`
-
-let marca = prompt("ingrese la marca del auto que desea").toLowerCase()
-let precioMax = parseFloat(prompt("ingrese el precio maximo que está dispuesto a pagar"))
-
-const disponibles = autosDisponibles(marca, precioMax, autos)
-
-if(disponibles.length > 0){
-    divAutos.innerHTML +=
-    `
-        <p>Hay ${disponibles.length} autos disponibles de la marca ${marca} con un valor máximo de ${precioMax}, detallados a continuación: </p>
-    `
-    disponibles.forEach(auto =>{
+function mostrarAutos(autos){
+    const divAutos = document.getElementById('divAutos')
+    divAutos.innerHTML = ""
+    autos.forEach(auto =>{
         divAutos.innerHTML +=
         `
             <div class="styleAutos" id="autoID${auto.id}">
-                <p>ID: ${auto.id}</p>
                 <p>Marca: ${auto.marca}</p>
                 <p>Modelo: ${auto.modelo}</p>
-                <p>Precio: ${auto.precio}</p>  
+                <p>Precio: ${auto.precio}</p>
+                <button id="botonCompra${auto.id}">Comprar</button>  
             </div> 
         `
     })
-    let idElegido 
-    do{
-        idElegido = parseInt(prompt("Ingrese el ID del auto que desea comprar. Ingrese 99 para cancelar la compra."))
-    } while (!(disponibles.some(auto => auto.id == idElegido) || idElegido == 99)); // verifica si el id del auto esta dentro de los disponibles
-    if(!(idElegido==99)){
-        const comprado = disponibles.find(auto => auto.id == idElegido) // encuentra el auto segun el id ingresado
-        comprado.descuento(prompt("ingrese un codigo de descuento o cualquier numero en caso de no tener ninguno"))
-        divAutos.innerHTML = `<p class='success'>Felicitaciones! Compraste el auto ${comprado.marca} modelo ${comprado.modelo}. Precio final: ${comprado.precio}</p>`
-        autos[idElegido].disminuirStock()
-    } else {divAutos.innerHTML = `<p class='error'>No ha comprado ningun auto.</p>`}
-} else divAutos.innerHTML = `<p>No contamos con autos disponibles de la marca ${marca}.</p>`
+    autos.forEach(auto =>{
+        const botonCompra = document.getElementById(`botonCompra${auto.id}`)
+        botonCompra.addEventListener('click', () => {
+            divAutos.innerHTML =
+            `
+            <p class='success'>Felicitaciones! Compraste el auto ${auto.marca} modelo ${auto.modelo}. Precio final: ${auto.precio}</p>
+            `
+            auto.disminuirStock()
+        })
+    })
+} // funcion que recibe un array de autos y los inserta en el codigo HTML
 
+const inputBusq = document.getElementById('inputBusq')
+const botonReset = document.getElementById('botonReset')
+const disponibles = autos.slice()
+mostrarAutos(disponibles)
+
+inputBusq.addEventListener('change', (disponibles) => {
+    let busqueda = document.getElementById('inputBusq').value
+    disponibles = autosDisponibles(busqueda, autos)
+    mostrarAutos(disponibles)
+})
+
+botonReset.addEventListener('click', (disponibles) => {
+    document.getElementById('inputBusq').value = ""
+    disponibles = autos.slice()
+    mostrarAutos(disponibles)
+})
