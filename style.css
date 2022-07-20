@@ -1,10 +1,18 @@
 .styleAutos{
     background-color: cyan;
 }
+.styleCarrito{
+    background-color: lightblue;
+}
 .success{
     background-color: lime;
 }
 .error{
     color: white;
     background-color: red;
+}
+.panel{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
