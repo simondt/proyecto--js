@@ -12,12 +12,8 @@ class Auto{
     } // disminuye en uno el stock del auto
 
     descuento(codigo){
-        if(codigo == "25OFF"){
-            this.precio *= 0.75
-        }else if(codigo == "50OFF"){
-            this.precio *= 0.5
-        }else this.precio *= 1 
-    } // aplica un codigo de descuento segun lo ingresado
+        this. precio *= (codigo == "25OFF") ? 0.75 : 1 // aplica un codigo de descuento segun lo ingresado
+    }
 }
 
 const auto1 = new Auto(0, 1987, "toyota", 19000, 12)
@@ -49,7 +45,8 @@ function mostrarAutos(autos, carrito){
                     <p>Marca: ${auto.marca}</p>
                     <p>Modelo: ${auto.modelo}</p>
                     <p>Precio: ${auto.precio}</p>
-                    <button id="botonAgregar${auto.id}">Agregar al carrito</button>  
+                    <img class="fotoAuto" src="./imgs/${auto.marca}${auto.modelo}.jpg" alt="foto ${auto.marca}${auto.modelo}">
+                    <p><button id="botonAgregar${auto.id}" class="styleAgregar">Agregar al carrito</button></p>
                 </div> 
             `
         })
@@ -71,24 +68,28 @@ function mostrarAutos(autos, carrito){
 
 function mostrarCarrito (carrito){
     const divAutos = document.getElementById('divAutos')
-    divAutos.innerHTML = ""
+    divAutos.innerHTML = `<div id="divCarrito"></div>`
+    const divCarrito = document.getElementById('divCarrito')
+    let total = 0
     if(carrito.length > 0){
         carrito.forEach(auto =>{
-            divAutos.innerHTML +=
+            divCarrito.innerHTML +=
             `
                 <div class="styleCarrito" id="carritoID${carrito.indexOf(auto)}">
                     <p>Marca: ${auto.marca}</p>
                     <p>Modelo: ${auto.modelo}</p>
                     <p>Precio: ${auto.precio}</p>
+                    <img class="fotoAuto" src="./imgs/${auto.marca}${auto.modelo}.jpg" alt="foto ${auto.marca}${auto.modelo}">
                 </div> 
             `
+            let {precio} = auto // desestructura el objeto
+            total += precio ?? 0 // evita errores en la carga de datos
         })
-        let total = carrito.reduce((a, b) => a + b.precio, 0) // funcion que realiza una suma de la propiedad precios de cada objeto del array
-        divAutos.innerHTML += 
+        divCarrito.innerHTML += 
         `
             <p>Total: $${total}</p>
-            <button id="botonComprar">Realizar compra</button>
-            <button id="botonLimpiar">Limpiar carrito</button>
+            <p><button id="botonComprar">Realizar compra</button>
+            <button id="botonLimpiar">Limpiar carrito</button></p>
         `
         const botonLimpiar = document.getElementById('botonLimpiar')
         botonLimpiar.addEventListener('click', () =>{
@@ -99,18 +100,20 @@ function mostrarCarrito (carrito){
         })
         const botonCompra = document.getElementById('botonComprar')
         botonCompra.addEventListener('click', () => {
-            divAutos.innerHTML =`<p class='success'>Detalle de tu orden: </p>`
+            divAutos.innerHTML =`<div id="divCompra">Detalle de tu orden: </div>`
+            divCompra.innerHTML =`<p class='success'>Detalle de tu orden: </p>`
             carrito.forEach(auto =>{
-                divAutos.innerHTML +=
+                divCompra.innerHTML +=
                 `
-                    <div class="success">
+                    <div class="styleCompra">
                         <p>Marca: ${auto.marca}</p>
                         <p>Modelo: ${auto.modelo}</p>
-                        <p>Precio: ${auto.precio}</p> 
+                        <p>Precio: ${auto.precio}</p>
+                        <img class="fotoAuto" src="./imgs/${auto.marca}${auto.modelo}.jpg" alt="foto ${auto.marca}${auto.modelo}">
                     </div> 
                 `
             })
-            divAutos.innerHTML += `<p class='success'>Total: $${total} </p>`
+            divCompra.innerHTML += `<p class='success'>Total: $${total} </p>`
         })
     }else divAutos.innerHTML = `<p class="error">Su carrito se encuentra vacío</p>`
 }
@@ -118,7 +121,7 @@ function mostrarCarrito (carrito){
 const inputBusq = document.getElementById('inputBusq')
 const botonReset = document.getElementById('botonReset')
 const botonCarrito = document.getElementById('botonCarrito')
-const disponibles = autos.slice()
+const disponibles = structuredClone(autos)
 const carrito = []
 
 if(localStorage.getItem('itemsCarrito')){
@@ -137,7 +140,7 @@ inputBusq.addEventListener('input', (disponibles) => {
 
 botonReset.addEventListener('click', (disponibles) => {
     document.getElementById('inputBusq').value = ""
-    disponibles = autos.slice()
+    disponibles = structuredClone(autos)
     mostrarAutos(disponibles, carrito)
 }) // resetea el array de autos
 

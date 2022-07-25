@@ -1,18 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap');
+/* google fonts */
+
+*{
+    font-family: 'Source Sans Pro', sans-serif;
+    margin: 0px;
+    padding: 0px;
+}
+
+body{
+    background-color: #EFF6E0;
+}
+
+.panel{
+    margin: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#divAutos{
+    padding: 10px;
+    margin: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.styleAgregar{
+    background: linear-gradient(to left, #dce35b, #45b649); 
+    border-radius: 2px;
+    border: solid black 1px;
+    box-shadow: none;
+    height: 30px;
+    width: 150px;
+}
+
+.fotoAuto{
+    width: 400px;
+    height: 200px;
+    object-fit: cover;
+}
+
 .styleAutos{
-    background-color: cyan;
+    background-color: #598392;
+    color: white;
+    text-transform: capitalize;
+    font-weight: bold;
+    width: auto;
+    text-align: center;
 }
+.styleAutos p{
+    margin: 10px;
+}
+
 .styleCarrito{
-    background-color: lightblue;
+    text-transform: capitalize;
+    background-color: #124559;
+    color: white;
+    padding: 10px;
+    border-bottom: 1px solid black;
 }
+.styleCarrito p{
+    margin: 10px;
+}
+
+.styleCompra{
+    text-transform: capitalize;
+    padding: 10px;
+    margin: 10px;
+    background-color: #AEC3B0;
+}
+
 .success{
     background-color: lime;
 }
 .error{
     color: white;
     background-color: red;
-}
-.panel{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
 }
