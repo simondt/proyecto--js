@@ -31,9 +31,9 @@ const autos = [auto1, auto2, auto3, auto4, auto5, auto6, auto7, auto8, auto9]
 function autosDisponibles (inputBusq, autos){
     const disponibles = autos.filter(auto => (auto.marca.includes(inputBusq) || auto.precio.toString().includes(inputBusq) || auto.modelo.toString().includes(inputBusq)))
     return disponibles
-} // funcion que recibe una marca, modelo o precio y devuelve un array con los elementos que coincidan.
+} // funcion que recibe una marca, modelo o precio y devuelve un array con los objetos que coincidan.
 
-function mostrarAutos(autos, carrito){
+function mostrarAutos(autos, carrito){ // funcion que recibe un array de autos y los inserta en el codigo HTML
     const divAutos = document.getElementById('divAutos')
     const botonCarrito = document.getElementById('botonCarrito')
     divAutos.innerHTML = ""
@@ -46,32 +46,43 @@ function mostrarAutos(autos, carrito){
                     <p>Modelo: ${auto.modelo}</p>
                     <p>Precio: ${auto.precio}</p>
                     <img class="fotoAuto" src="./imgs/${auto.marca}${auto.modelo}.jpg" alt="foto ${auto.marca}${auto.modelo}">
-                    <p><button id="botonAgregar${auto.id}" class="styleAgregar">Agregar al carrito</button></p>
+                    <p><button id="botonAgregar${auto.id}" class="styleAgregar"><i class="bi bi-cart"></i> Agregar</button></p>
                 </div> 
             `
         })
         autos.forEach(auto =>{
             const botonAgregar = document.getElementById(`botonAgregar${auto.id}`)
             botonAgregar.addEventListener('click', () => {
-                carrito.push(auto)
+                carrito.push(auto) // agrega autos al array del carrito
                 localStorage.setItem('itemsCarrito', JSON.stringify(carrito)) // guarda en localStorage los items del carrito
-                botonCarrito.innerHTML = `Carrito (${carrito.length})`
-                divAutos.innerHTML =
-                `
-                <p class='success'>El auto ${auto.marca} modelo ${auto.modelo} con un valor de ${auto.precio} pesos ha sido agregado al carrito</p>
-                `
-
+                botonCarrito.innerHTML = `<i class="bi bi-cart"></i> (${carrito.length})`
+                Toastify({
+                    text: "El auto ha sido agregado al carrito",
+                    duration: 3000,
+                    newWindow: true,
+                    close: false,
+                    gravity: "bottom", 
+                    position: "right", 
+                    stopOnFocus: true, 
+                    style: {
+                      background: "linear-gradient(to left, #dce35b, #45b649)",
+                      color: "black"
+                    },
+                    onClick: function(){ // hacer click en el toast te lleva al carrito
+                        mostrarCarrito(carrito)
+                    } 
+                  }).showToast();
             })
         })
     }else divAutos.innerHTML = `<p class="error">No se han encontrado autos según el criterio de búsqueda</p>`
-} // funcion que recibe un array de autos y los inserta en el codigo HTML
+} 
 
 function mostrarCarrito (carrito){
-    const divAutos = document.getElementById('divAutos')
-    divAutos.innerHTML = `<div id="divCarrito"></div>`
-    const divCarrito = document.getElementById('divCarrito')
-    let total = 0
     if(carrito.length > 0){
+        const divAutos = document.getElementById('divAutos')
+        divAutos.innerHTML = `<div id="divCarrito"></div>`
+        const divCarrito = document.getElementById('divCarrito')
+        let total = 0
         carrito.forEach(auto =>{
             divCarrito.innerHTML +=
             `
@@ -81,41 +92,98 @@ function mostrarCarrito (carrito){
                     <p>Precio: ${auto.precio}</p>
                     <img class="fotoAuto" src="./imgs/${auto.marca}${auto.modelo}.jpg" alt="foto ${auto.marca}${auto.modelo}">
                 </div> 
-            `
+            ` // todas las imagenes deben tener el formato de "marcaModelo.jpg" para ser reconocidas por el codigo
             let {precio} = auto // desestructura el objeto
             total += precio ?? 0 // evita errores en la carga de datos
         })
         divCarrito.innerHTML += 
         `
             <p>Total: $${total}</p>
-            <p><button id="botonComprar">Realizar compra</button>
-            <button id="botonLimpiar">Limpiar carrito</button></p>
+            <p><button class="boton" id="botonComprar">Realizar compra</button>
+            <button class="boton" id="botonLimpiar">Limpiar carrito</button></p>
         `
         const botonLimpiar = document.getElementById('botonLimpiar')
-        botonLimpiar.addEventListener('click', () =>{
-            carrito.length = 0
-            localStorage.setItem('itemsCarrito', JSON.stringify(carrito))
-            botonCarrito.innerHTML = `Carrito (${carrito.length})`
-            mostrarCarrito(carrito)            
+        // presionar el boton limpiar ejecuta un modal requiriendo la confirmación del usuario
+        botonLimpiar.addEventListener('click', () => {
+            Swal.fire({
+                title: '¿Desea limipiar el carrito?',
+                text: "Se eliminaran todos los ítems",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Cancelar',
+                confirmButtonText: 'Limpiar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    carrito.length = 0
+                    localStorage.setItem('itemsCarrito', JSON.stringify(carrito))
+                    botonCarrito.innerHTML = `<i class="bi bi-cart"></i> (${carrito.length})`
+                    mostrarAutos(disponibles, carrito)
+                    Toastify({ // muestra una notificacion toast
+                        text: "Se han eliminado todos los ítems del carrito",
+                        duration: 3000,
+                        newWindow: true,
+                        close: false,
+                        gravity: "bottom",
+                        position: "right",
+                        stopOnFocus: false,
+                        style: {
+                            background: "#01161E",
+                        },
+                        onClick: function () { }
+                    }).showToast();
+                }
+            })
         })
         const botonCompra = document.getElementById('botonComprar')
+        // ejecuta modal al hacer click en el boton de compra
         botonCompra.addEventListener('click', () => {
-            divAutos.innerHTML =`<div id="divCompra">Detalle de tu orden: </div>`
-            divCompra.innerHTML =`<p class='success'>Detalle de tu orden: </p>`
-            carrito.forEach(auto =>{
-                divCompra.innerHTML +=
-                `
-                    <div class="styleCompra">
-                        <p>Marca: ${auto.marca}</p>
-                        <p>Modelo: ${auto.modelo}</p>
-                        <p>Precio: ${auto.precio}</p>
-                        <img class="fotoAuto" src="./imgs/${auto.marca}${auto.modelo}.jpg" alt="foto ${auto.marca}${auto.modelo}">
-                    </div> 
-                `
-            })
-            divCompra.innerHTML += `<p class='success'>Total: $${total} </p>`
+            Swal.fire({
+                title: 'Felicitaciones!',
+                text: "La compra ha sido realizada con éxito",
+                icon: 'success',
+                showCancelButton: true,
+                confirmButtonColor: '#01161E',
+                cancelButtonColor: '#598392',
+                cancelButtonText: 'Volver al inicio',
+                confirmButtonText: 'Ver detalle'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    divAutos.innerHTML = `<div id="divCompra">Detalle de tu orden: </div>`
+                    divCompra.innerHTML = `<p class='success'>Detalle de tu orden: </p>`
+                    carrito.forEach(auto => {
+                        divCompra.innerHTML +=
+                            `
+                            <div class="styleCompra">
+                                <p>Marca: ${auto.marca}</p>
+                                <p>Modelo: ${auto.modelo}</p>
+                                <p>Precio: ${auto.precio}</p>
+                                <img class="fotoAuto" src="./imgs/${auto.marca}${auto.modelo}.jpg" alt="foto ${auto.marca}${auto.modelo}">
+                            </div> 
+                        ` 
+                    })
+                    divCompra.innerHTML += `<p class='success'>Total: $${total} </p>`
+                } else mostrarAutos(disponibles)
+            }
+            )
         })
-    }else divAutos.innerHTML = `<p class="error">Su carrito se encuentra vacío</p>`
+    }else { // si el carrito está vacio, ejecuta un toast
+        Toastify({
+            text: "El carrito se encuentra vacío",
+            duration: 3000,
+            newWindow: true,
+            close: false,
+            gravity: "bottom", 
+            position: "right", 
+            stopOnFocus: false, 
+            style: {
+                background: " linear-gradient(to bottom, #8e9eab, #eef2f3)",
+                color: "black"
+            },
+            onClick: function () { } 
+        }).showToast();
+    }
 }
 
 const inputBusq = document.getElementById('inputBusq')
@@ -127,7 +195,7 @@ const carrito = []
 if(localStorage.getItem('itemsCarrito')){
     const carritoParse = JSON.parse(localStorage.getItem('itemsCarrito'))
     carritoParse.forEach(item => {carrito.push(item)})
-    botonCarrito.innerHTML = `Carrito (${carrito.length})`
+    botonCarrito.innerHTML = `<i class="bi bi-cart"></i> (${carrito.length})`
 } // verifica si en localStorage hay datos guardados del carrito
 
 mostrarAutos(disponibles, carrito)
@@ -146,4 +214,4 @@ botonReset.addEventListener('click', (disponibles) => {
 
 botonCarrito.addEventListener('click', () =>{
     mostrarCarrito(carrito)
-})
+}) // muestra el carrito
