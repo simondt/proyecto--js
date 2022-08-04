@@ -36,18 +36,19 @@ function autosDisponibles (inputBusq, autos){
 function mostrarAutos(autos, carrito){ // funcion que recibe un array de autos y los inserta en el codigo HTML
     const divAutos = document.getElementById('divAutos')
     const botonCarrito = document.getElementById('botonCarrito')
-    divAutos.innerHTML = ""
+    divAutos.innerHTML = `<ul id="divInicio"></ul>`
+    const divInicio = document.getElementById('divInicio')
     if (autos.length > 0){
         autos.forEach(auto =>{
-            divAutos.innerHTML +=
+            divInicio.innerHTML +=
             `
-                <div class="styleAutos" id="autoID${auto.id}">
+                <li class="styleAutos" id="autoID${auto.id}">
                     <p>Marca: ${auto.marca}</p>
                     <p>Modelo: ${auto.modelo}</p>
-                    <p>Precio: ${auto.precio}</p>
+                    <p>Precio: US$${auto.precio}</p>
                     <img class="fotoAuto" src="./imgs/${auto.marca}${auto.modelo}.jpg" alt="foto ${auto.marca}${auto.modelo}">
                     <p><button id="botonAgregar${auto.id}" class="styleAgregar"><i class="bi bi-cart"></i> Agregar</button></p>
-                </div> 
+                </li> 
             `
         })
         autos.forEach(auto =>{
@@ -69,38 +70,51 @@ function mostrarAutos(autos, carrito){ // funcion que recibe un array de autos y
                       color: "black"
                     },
                     onClick: function(){ // hacer click en el toast te lleva al carrito
-                        mostrarCarrito(carrito)
+                        mostrarCarrito()
                     } 
                   }).showToast();
             })
         })
-    }else divAutos.innerHTML = `<p class="error">No se han encontrado autos según el criterio de búsqueda</p>`
+    }else divInicio.innerHTML = `<p class="error">No se han encontrado autos según el criterio de búsqueda</p>`
 } 
 
-function mostrarCarrito (carrito){
+const mostrarCarrito = () => {
     if(carrito.length > 0){
         const divAutos = document.getElementById('divAutos')
-        divAutos.innerHTML = `<div id="divCarrito"></div>`
+        divAutos.innerHTML = 
+            `
+                <table id="divCarrito">
+                    <tr id="cabecera" class="styleCarrito">
+                        <th><i class="bi bi-camera"></i></th>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                    </tr>
+                </table>
+            `
         const divCarrito = document.getElementById('divCarrito')
         let total = 0
         carrito.forEach(auto =>{
             divCarrito.innerHTML +=
             `
-                <div class="styleCarrito" id="carritoID${carrito.indexOf(auto)}">
-                    <p>Marca: ${auto.marca}</p>
-                    <p>Modelo: ${auto.modelo}</p>
-                    <p>Precio: ${auto.precio}</p>
-                    <img class="fotoAuto" src="./imgs/${auto.marca}${auto.modelo}.jpg" alt="foto ${auto.marca}${auto.modelo}">
-                </div> 
+                <tr class="styleCarrito" id="carritoID${carrito.indexOf(auto)}">
+                    <td><img class="fotoAutoCarrito" src="./imgs/${auto.marca}${auto.modelo}.jpg" alt="foto ${auto.marca}${auto.modelo}"></td>
+                    <td>${auto.marca} ${auto.modelo}</td>
+                    <td>US$${auto.precio}</td>
+                </tr>               
+
             ` // todas las imagenes deben tener el formato de "marcaModelo.jpg" para ser reconocidas por el codigo
             let {precio} = auto // desestructura el objeto
             total += precio ?? 0 // evita errores en la carga de datos
         })
-        divCarrito.innerHTML += 
+        divAutos.innerHTML += 
         `
-            <p>Total: $${total}</p>
-            <p><button class="boton" id="botonComprar">Realizar compra</button>
-            <button class="boton" id="botonLimpiar">Limpiar carrito</button></p>
+            <div id="contenedorOpciones">
+                <div id="opcionesCarrito">
+                    <p class="styleTotal">Total: US$${total}</p>
+                    <p><button class="boton" id="botonComprar">Realizar compra</button>
+                    <button id="botonLimpiar"><i class="bi bi-trash"></i></button></p>
+                </div>
+            </div>
         `
         const botonLimpiar = document.getElementById('botonLimpiar')
         // presionar el boton limpiar ejecuta un modal requiriendo la confirmación del usuario
@@ -139,6 +153,7 @@ function mostrarCarrito (carrito){
         const botonCompra = document.getElementById('botonComprar')
         // ejecuta modal al hacer click en el boton de compra
         botonCompra.addEventListener('click', () => {
+            carrito.forEach(auto => autos[auto.id].disminuirStock()) // disminuye en uno el stock del array original de autos
             Swal.fire({
                 title: 'Felicitaciones!',
                 text: "La compra ha sido realizada con éxito",
@@ -150,20 +165,31 @@ function mostrarCarrito (carrito){
                 confirmButtonText: 'Ver detalle'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    divAutos.innerHTML = `<div id="divCompra">Detalle de tu orden: </div>`
-                    divCompra.innerHTML = `<p class='success'>Detalle de tu orden: </p>`
+                    divAutos.innerHTML = 
+                    `
+                        <table id="divCompra">
+                            <tr>
+                                <th><h2>Resumen de tu compra:</h2></th>
+                            </tr>
+                            <tr id="cabecera" class="styleCarrito">
+                                <th><i class="bi bi-camera"></i></th>
+                                <th>Producto</th>
+                                <th>Precio</th>
+                            </tr>
+                        </table>
+                    `
+                    const divCompra = document.getElementById('divCompra')
                     carrito.forEach(auto => {
                         divCompra.innerHTML +=
-                            `
-                            <div class="styleCompra">
-                                <p>Marca: ${auto.marca}</p>
-                                <p>Modelo: ${auto.modelo}</p>
-                                <p>Precio: ${auto.precio}</p>
-                                <img class="fotoAuto" src="./imgs/${auto.marca}${auto.modelo}.jpg" alt="foto ${auto.marca}${auto.modelo}">
-                            </div> 
+                        `
+                            <tr class="styleCarrito">
+                                <td><img class="fotoAutoCarrito" src="./imgs/${auto.marca}${auto.modelo}.jpg" alt="foto ${auto.marca}${auto.modelo}"></td>
+                                <td>${auto.marca} ${auto.modelo}</td>
+                                <td>US$${auto.precio}</td>
+                            </tr>    
                         ` 
                     })
-                    divCompra.innerHTML += `<p class='success'>Total: $${total} </p>`
+                    divCompra.innerHTML += `<p class='styleTotal'>Total: $${total} </p>`
                 } else mostrarAutos(disponibles)
             }
             )
@@ -213,5 +239,20 @@ botonReset.addEventListener('click', (disponibles) => {
 }) // resetea el array de autos
 
 botonCarrito.addEventListener('click', () =>{
-    mostrarCarrito(carrito)
+    mostrarCarrito()
 }) // muestra el carrito
+
+const divisa = document.getElementById('divisa')
+fetch('https://criptoya.com/api/dolar') // api de criptoya
+.then(response => response.json()) // convierto la promesa en un json
+.then(({solidario}) => {
+    divisa.innerHTML = `Cotización actual: 1US$ = $${solidario}`
+})
+
+setInterval(() => {
+    fetch('https://criptoya.com/api/dolar')
+        .then(response => response.json()) // convierto la promesa en un json
+        .then(({solidario}) => {
+            divisa.innerHTML = `Cotización actual: 1US$ = $${solidario}`
+        })
+}, 300000) //300mil ms = 5 minutos

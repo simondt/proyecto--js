@@ -15,17 +15,27 @@
 
 </head>
 <body>
-    <div><p>Bienvenido a venta de autos online</p></div>
-    <div class="panel">
-        <div>
-            <input class="entrada" id="inputBusq" type="text" placeholder="Modelo, marca, precio...">
-            <button class="boton" id="botonReset">Reestablecer</button>
+    <header>
+        <p><img id="logo" src="./imgs/logo.png" alt="logo"></p>
+        <div class="panel">
+            <div>
+                <button class="boton" id="botonReset"><i class="bi bi-house-door"></i> Inicio</button>
+            </div>
+            <div>
+                <input class="entrada" id="inputBusq" type="text" placeholder="Buscar por modelo, marca o precio...">
+            </div>
+            <div>
+                <button class="boton" id="botonCarrito"><i class="bi bi-cart"></i></button>
+            </div>
         </div>
-        <div>
-            <button class="boton" id="botonCarrito"><i class="bi bi-cart"></i></button>
-        </div> 
-    </div>
-    <div id="divAutos"></div>
+    </header>
+    <main id="divAutos"></main>
+    <footer>
+        <img id="logoAlt" src="./imgs/logoBlanco.png" alt="logoAlt">
+        <p>Los precios están expresados en dólares. Se toma la cotización del dólar solidario al momento de hacer la compra.</p>
+        <p class="styleDolar" id="divisa"></p>
+        <p class="styleDesc">Este valor actualiza cada 5 minutos</p>
+    </footer>
     
     <!-- toastify -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
